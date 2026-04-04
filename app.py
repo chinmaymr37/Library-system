@@ -185,7 +185,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         user = get_user_by_username(username)
-        if user is not None :
+        if user is not None and check_password_hash(user[3], password):
             session["username"] = username
             session["role"] = user[4]
             session["member_id"] = user[1]
@@ -213,7 +213,8 @@ def register():
         flash("Only admin can register users")
         return redirect(url_for("home"))
     if request.method == "POST":
-        member_id = int(request.form["member_id"])
+        member_id = request.form.get("member_id")
+        member_id = int(member_id) if member_id else None
         username = request.form["username"]
         password = request.form["password"]
         password = generate_password_hash(password)
