@@ -1,4 +1,11 @@
 import sqlite3
+import psycopg2
+import os
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+def get_connection():
+    return psycopg2.connect(DATABASE_URL)
 
 def create_table():
     create_book_table()
@@ -8,12 +15,12 @@ def create_table():
     create_copies_table() 
 
 def create_book_table():
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         ISBN TEXT UNIQUE,
         title TEXT NOT NULL,
         author TEXT NOT NULL,
@@ -27,12 +34,12 @@ def create_book_table():
     conn.close()
 
 def create_copies_table():
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS copies (
-        copy_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        copy_id SERIAL PRIMARY KEY,
         book_id INTEGER NOT NULL,
         barcode TEXT UNIQUE NOT NULL,
         available INTEGER NOT NULL,
@@ -44,12 +51,12 @@ def create_copies_table():
     conn.close()
 
 def create_member_table():
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS members (
-        member_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        member_id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
         class INTEGER ,
         section TEXT ,
@@ -61,12 +68,12 @@ def create_member_table():
     conn.close()
 
 def create_issue_table():
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS issues (
-        issue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        issue_id SERIAL PRIMARY KEY,
         member_id INTEGER NOT NULL,
         copy_id INTEGER NOT NULL,
         issue_date TEXT NOT NULL,
@@ -79,12 +86,12 @@ def create_issue_table():
     conn.close()
 
 def create_user_table():
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id SERIAL PRIMARY KEY,
         member_id INTEGER ,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
@@ -97,7 +104,7 @@ def create_user_table():
     conn.close()
 
 def add_book(ISBN, title, author, category, rack, shelf):
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
     
     cursor.execute("SELECT * FROM books WHERE ISBN = ?", (ISBN,))
@@ -118,7 +125,7 @@ def add_book(ISBN, title, author, category, rack, shelf):
     return book_id , True
 
 def add_copy(book_id, barcode):
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -130,7 +137,7 @@ def add_copy(book_id, barcode):
     conn.close()
 
 def get_all_books():
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -151,7 +158,7 @@ def get_all_books():
     return books
 
 def delete_book(book_id):
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -174,7 +181,7 @@ def delete_book(book_id):
     return True
 
 def issue_book(barcode ,member_id , duration):
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
     
     copy = get_copy_by_barcode(barcode)
@@ -215,7 +222,7 @@ def issue_book(barcode ,member_id , duration):
     return updated > 0
 
 def return_book(barcode):
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     copy = get_copy_by_barcode(barcode)
@@ -265,7 +272,7 @@ def return_book(barcode):
 
 def get_copy_by_barcode(barcode):
 
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM copies WHERE barcode = ?", (barcode,))
@@ -275,7 +282,7 @@ def get_copy_by_barcode(barcode):
     return book
 
 def get_member_by_member_id(member_id):
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM members WHERE member_id = ?", (member_id,))
@@ -286,7 +293,7 @@ def get_member_by_member_id(member_id):
     
 def get_overdue_books():
 
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     from datetime import date
@@ -308,7 +315,7 @@ def get_overdue_books():
 
 def get_user_by_username(username):
 
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -324,7 +331,7 @@ def get_user_by_username(username):
     return user
 
 def add_member(name, class_, section, roll_number):
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM members WHERE roll_number = ?", (roll_number,))
@@ -345,7 +352,7 @@ def add_member(name, class_, section, roll_number):
 
 def get_all_members():
 
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM members")
@@ -355,7 +362,7 @@ def get_all_members():
     return rows
 
 def get_issued_books():
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -373,7 +380,7 @@ def get_issued_books():
 
 def get_member_issues(member_id):
 
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     from datetime import date
@@ -402,7 +409,7 @@ def get_member_issues(member_id):
 
 def add_user(member_id, username, password, role):
 
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -415,7 +422,7 @@ def add_user(member_id, username, password, role):
 
 def search_books(input_value):
 
-    conn = sqlite3.connect("database.db")
+    conn = get_connection()
     cursor = conn.cursor()
 
     base_query = """
