@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="navbar">
+    <a href="/">Home</a> |
+    <a href="/view_books">View Books</a> |
+    <a href="/view_members">View Members</a> |
+    {% if session.get("role") == "admin" %}
+        <a href="/add_book">Add Book</a> |
+        <a href="/issue_book">Issue</a> |
+        <a href="/return_book">Return</a> |
+        <a href="/add_member">Add Member</a> |
+        <a href="/register">Register User</a> |
+    {% endif %}
+    <a href="/issued_books">Issued Books</a> |
+    <a href="/overdue">Overdue</a> |
+    <a href="/search">Search</a> |
+    {% if session.get("username") %}
+        <a href="/logout">Logout</a> 
+    {% else %}
+        <a href="/login">Login</a> 
+    {% endif %}
+
+    </div>
+    <hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+<div class="center-container">
+    <h1>Library Barcode System</h1>
+    <div class="stats">
+   <a href="/view_books" class="card">
+    <h3><i class="fas fa-book"></i> Total Books</h3>
+    <p>{{ total }}</p>
+</a>
+
+<a href="/view_books?filter=available" class="card">
+    <h3><i class="fas fa-check-circle"></i> Available</h3>
+    <p>{{ available }}</p>
+</a>
+
+<a href="/view_books?filter=issued" class="card">
+    <h3><i class="fas fa-times-circle"></i> Issued</h3>
+    <p>{{ issued }}</p>
+</a>
+</div>
+    <h3>Menu</h3>
+
+    <div class="menu-buttons">
+    <a href="/add_book" class="btn">Add Book</a>
+    <a href="/issue_book" class="btn">Issue Book</a>
+    <a href="/return_book" class="btn">Return Book</a>
+</div>
+</div>
+
+</body>
+</html>

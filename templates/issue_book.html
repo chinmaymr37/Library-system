@@ -1,0 +1,89 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<div class="navbar">
+    <a href="/">Home</a> |
+    <a href="/view_books">View Books</a> |
+    <a href="/view_members">View Members</a>|
+    {% if session.get("role") == "admin" %}
+        <a href="/add_book">Add Book</a> |
+        <a href="/issue_book">Issue</a> |
+        <a href="/return_book">Return</a> |
+        <a href="/add_member">Add Member</a> |
+        <a href="/register">Register User</a> |
+    {% endif %}
+    <a href="/issued_books">Issued Books</a>|
+    <a href="/overdue">Overdue</a> |
+    <a href="/search">Search</a>|
+    {% if session.get("role") == "user" %}
+    <a href="/member_dashboard">My Books</a>|
+    {% endif %}
+    {% if session.get("username") %}
+        <a href="/logout">Logout</a>
+    {% endif %}
+    </div>
+<hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+<div class="container">
+<h1>Issue Book</h1>
+<form method="POST">
+    <input type="text" name="barcode" id="barcode" placeholder="Enter Barcode" required>
+    <input type="number" name="member_id" placeholder="Member ID" required>
+    <select name="duration">
+    <option value="7">1 Week</option> 
+    <option value="14">2 Weeks</option>
+    <option value="21">3 Weeks</option>
+    <option value="30">1 Months</option>
+    <option value="90">3 Months</option>
+    <option value="180">6 Months</option>
+    </select>
+
+    <button type="submit">Issue Book</button>
+    <button type="button" onclick="startScanner()">Scan Barcode</button>
+</form>
+</div>
+
+<!-- Scanner container -->
+<div id="scanner" style="width:300px; display:none;"></div>
+
+<!-- Quagga Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
+<script>
+function startScanner() {
+    document.getElementById("scanner").style.display = "block";
+
+    Quagga.init({
+        inputStream: {
+            type: "LiveStream",
+            target: document.querySelector('#scanner'),
+            constraints: {
+                facingMode: "environment"
+            }
+        },
+        decoder: {
+            readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
+        }
+    }, function(err) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        Quagga.start();
+    });
+
+    Quagga.onDetected(function(result) {
+        let code = result.codeResult.code;
+
+        document.getElementById("barcode").value = code;
+
+        Quagga.stop();
+        document.getElementById("scanner").style.display = "none";
+    });
+}
+</script>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register User</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+    <a href="/">Home</a> |
+    <a href="/view_books">View Books</a> |
+    <a href="/view_members">View Members</a> |
+    {% if session.get("role") == "admin" %}
+        <a href="/add_book">Add Book</a> |
+        <a href="/issue_book">Issue</a> |
+        <a href="/return_book">Return</a> |
+        <a href="/add_member">Add Member</a> |
+        <a href="/register">Register User</a> |
+    {% endif %}
+    <a href="/issued_books">Issued Books</a> |
+    <a href="/overdue">Overdue</a> |
+    <a href="/search">Search</a> |
+    {% if session.get("username") %}
+        <a href="/logout">Logout</a> 
+    {% else %}
+        <a href="/login">Login</a> 
+    {% endif %}
+
+    </div>
+    <hr>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+<div class="container">
+<h1>Register User</h1>
+<form method="POST">
+    <input type="number" name="member_id" placeholder="Member ID (optional)" >
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <select name="role" required>
+        <option value="">Select Role</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+    </select>
+    <button type="submit">Register</button>
+</form>
+</div>
+
+    <hr>
+</body>
+</html>

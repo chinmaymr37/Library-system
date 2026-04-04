@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+    <a href="/">Home</a> |
+    <a href="/view_books">View Books</a> |
+    <a href="/view_members">View Members</a>|
+    {% if session.get("role") == "admin" %}
+        <a href="/add_book">Add Book</a> |
+        <a href="/issue_book">Issue</a> |
+        <a href="/return_book">Return</a> |
+        <a href="/add_member">Add Member</a> |
+        <a href="/register">Register User</a> |
+    {% endif %}
+    <a href="/issued_books">Issued Books</a>|
+    <a href="/overdue">Overdue</a> |
+    <a href="/search">Search</a>|
+    {% if session.get("role") == "user" %}
+    <a href="/member_dashboard">My Books</a>|
+    {% endif %}
+    {% if session.get("username") %}
+        <a href="/logout">Logout</a>
+    {% endif %}
+    </div>
+    <hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="container">
+    <h2>All Books</h2>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Total Copies</th>
+            <th>Available Copies</th>
+            {% if session.get("role") == "admin" %}
+            <th>Action</th>
+            {% endif %}
+        </tr>
+
+        {% for row in rows %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[5] }}</td>
+            {% if session.get("role") == "admin" %}
+            <td><a href="/delete/{{ row[0] }}" onclick="return confirm('Are you sure?')">
+                Delete
+            </a></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        {% if not rows %}
+            <p style="margin-top:20px; color:#888;">No books available</p>
+        {% endif %}
+
+    </table>
+    </div>
+
+</body>
+</html>

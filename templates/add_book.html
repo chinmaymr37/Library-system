@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+    <a href="/">Home</a> |
+    <a href="/view_books">View Books</a> |
+    <a href="/view_members">View Members</a>|
+    {% if session.get("role") == "admin" %}
+        <a href="/add_book">Add Book</a> |
+        <a href="/issue_book">Issue</a> |
+        <a href="/return_book">Return</a> |
+        <a href="/add_member">Add Member</a> |
+        <a href="/register">Register User</a> |
+    {% endif %}
+    <a href="/issued_books">Issued Books</a>|
+    <a href="/overdue">Overdue</a> |
+    <a href="/search">Search</a>|
+    {% if session.get("role") == "user" %}
+    <a href="/member_dashboard">My Books</a>|
+    {% endif %}
+    {% if session.get("username") %}
+        <a href="/logout">Logout</a>
+    {% endif %}
+    </div>
+    <hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+<div class="container">
+<h1>Add Book</h1>
+
+<form method="POST" action="/add_book">
+    <input type="hidden" name="action" value="add_book">
+    <input type="text" name="ISBN" placeholder="ISBN">
+    <input type="text" name="title" placeholder="Title">
+    <input type="text" name="author" placeholder="Author">
+    <input type="text" name="category" placeholder="Category">
+    <input type="text" name="rack_number" placeholder="Rack Number">
+    <input type="text" name="shelf_number" placeholder="Shelf Number">
+    <input type="text" name="barcode" placeholder="Barcode">
+    <button type="submit">Add Book</button>
+</form>
+</div>
+<hr>
+<div class="container">
+<h1>Add Copy</h1>
+<form method="POST" action="/add_book">
+    <input type="hidden" name="action" value="add_copy">
+    <input type="text" name="book_id" placeholder="Book ID">
+    <input type="text" name="barcode" placeholder="Barcode">
+    <button type="submit">Add Copy</button>
+</form>
+</div>
+
+
+</body>
+</html>
