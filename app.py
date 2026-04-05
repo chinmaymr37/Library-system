@@ -59,8 +59,11 @@ def add_book_route():
     return render_template("add_book.html")
 
 @app.route("/add_member", methods=["GET", "POST"])
-
+@login_required
 def add_member_route():
+    if session.get("role") != "admin":
+        flash("Only admin can add members")
+        return redirect(url_for("home"))
     if request.method == "POST":
         name = request.form["name"]
         class_ = request.form["class"]
@@ -206,6 +209,9 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("role") != "admin":
+        flash("Only admin can add users")
+        return redirect(url_for("home"))
     if request.method == "POST":
         member_id = request.form.get("member_id")
         member_id = int(member_id) if member_id else None
