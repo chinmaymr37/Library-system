@@ -107,7 +107,7 @@ def add_book(ISBN, title, author, category, rack, shelf):
     conn = get_connection()
     cursor = conn.cursor()
     
-    cursor.execute("SELECT * FROM books WHERE ISBN = ?", (ISBN,))
+    cursor.execute("SELECT * FROM books WHERE ISBN = %s", (ISBN,))
     existing_book = cursor.fetchone()
     if existing_book:
         conn.close()
@@ -115,10 +115,11 @@ def add_book(ISBN, title, author, category, rack, shelf):
 
     cursor.execute("""
     INSERT INTO books (ISBN, title, author, category, rack, shelf)
-    VALUES (?, ?, ?, ?, ?, ?)
+    VALUES (%s, %s, %s, %s, %s, %s)
     """, (ISBN, title, author, category, rack, shelf))
 
-    book_id = cursor.lastrowid
+    cursor.execute("SELECT id FROM books WHERE ISBN = %s", (ISBN,))
+    book_id = cursor.fetchone()[0]
 
     conn.commit()
     conn.close()
@@ -130,7 +131,7 @@ def add_copy(book_id, barcode):
 
     cursor.execute("""
     INSERT INTO copies (book_id, barcode, available)
-    VALUES (?, ?, 1)
+    VALUES (%s, %s, 1)
     """, (book_id, barcode))
 
     conn.commit()
@@ -163,7 +164,7 @@ def delete_book(book_id):
 
     cursor.execute("""
     SELECT COUNT(*) FROM copies 
-    WHERE book_id = ? AND available = 0
+    WHERE book_id = %s AND available = 0
     """, (book_id,))
     
     issued_count = cursor.fetchone()[0]
@@ -172,8 +173,8 @@ def delete_book(book_id):
         conn.close()
         return False
 
-    cursor.execute("DELETE FROM copies WHERE book_id = ?", (book_id,))
-    cursor.execute("DELETE FROM books WHERE id = ?", (book_id,))
+    cursor.execute("DELETE FROM copies WHERE book_id = %s", (book_id,))
+    cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
 
     conn.commit()
     conn.close()
@@ -206,12 +207,12 @@ def issue_book(barcode ,member_id , duration):
     due_date = issue_date + timedelta(days=duration)
 
     cursor.execute(
-    "INSERT INTO issues (member_id, copy_id, issue_date, due_date ,return_date) VALUES (?, ?, ?, ?, NULL)",
+    "INSERT INTO issues (member_id, copy_id, issue_date, due_date ,return_date) VALUES (%s, %s, %s, %s, NULL)",
     (member_id, copy[0], issue_date, due_date)
     )
 
     cursor.execute(
-    "UPDATE copies SET available = 0 WHERE copy_id = ? AND available = 1",
+    "UPDATE copies SET available = 0 WHERE copy_id = %s AND available = 1",
     (copy[0],)
     )
 
@@ -238,7 +239,7 @@ def return_book(barcode):
     return_date = date.today()
 
     cursor.execute(
-        "SELECT * FROM issues WHERE copy_id = ? AND return_date IS NULL",
+        "SELECT * FROM issues WHERE copy_id = %s AND return_date IS NULL",
         (copy_id,)
     )
     issue = cursor.fetchone()
@@ -251,7 +252,7 @@ def return_book(barcode):
     fine = days_late * rate
 
     cursor.execute(
-        "UPDATE issues SET return_date = ? WHERE copy_id = ? AND return_date IS NULL",
+        "UPDATE issues SET return_date = %s WHERE copy_id = %s AND return_date IS NULL",
         (return_date, copy_id)
     )
 
@@ -261,7 +262,7 @@ def return_book(barcode):
         return False, 0
         
     cursor.execute(
-        "UPDATE copies SET available = 1 WHERE copy_id = ? AND available = 0",
+        "UPDATE copies SET available = 1 WHERE copy_id = %s AND available = 0",
         (copy_id,)
     )
 
@@ -275,7 +276,7 @@ def get_copy_by_barcode(barcode):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM copies WHERE barcode = ?", (barcode,))
+    cursor.execute("SELECT * FROM copies WHERE barcode = %s", (barcode,))
     book = cursor.fetchone()
 
     conn.close()
@@ -285,7 +286,7 @@ def get_member_by_member_id(member_id):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM members WHERE member_id = ?", (member_id,))
+    cursor.execute("SELECT * FROM members WHERE member_id = %s", (member_id,))
     member = cursor.fetchone()
 
     conn.close()
@@ -300,7 +301,7 @@ def get_overdue_books():
     today = date.today()
 
     cursor.execute("""
-    SELECT * FROM issues WHERE return_date IS NULL AND due_date < ?
+    SELECT * FROM issues WHERE return_date IS NULL AND due_date < %s
     """, (today,))
     overdue= cursor.fetchall()
     result = []
@@ -319,7 +320,7 @@ def get_user_by_username(username):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT * FROM users WHERE username = ?
+    SELECT * FROM users WHERE username = %s
     """, (username,)
     )
     user = cursor.fetchone()
@@ -334,7 +335,7 @@ def add_member(name, class_, section, roll_number):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM members WHERE roll_number = ?", (roll_number,))
+    cursor.execute("SELECT * FROM members WHERE roll_number = %s", (roll_number,))
     existing_member = cursor.fetchone()
     if existing_member:
         conn.close()
@@ -342,7 +343,7 @@ def add_member(name, class_, section, roll_number):
 
     cursor.execute("""
     INSERT INTO members (name, class, section, roll_number)
-    VALUES (?, ?, ?, ?)
+    VALUES (%s, %s, %s, %s)
     """, (name, class_, section, roll_number))
 
     conn.commit()
@@ -391,7 +392,7 @@ def get_member_issues(member_id):
     FROM issues i
     JOIN copies c ON i.copy_id = c.copy_id
     JOIN books b ON c.book_id = b.id
-    WHERE i.member_id = ?
+    WHERE i.member_id = %s
     """, (member_id,))
 
     rows = cursor.fetchall()
@@ -414,7 +415,7 @@ def add_user(member_id, username, password, role):
 
     cursor.execute("""
     INSERT INTO users (member_id, username, password, role)
-    VALUES (?, ?, ?, ?)
+    VALUES (%s, %s, %s, %s)
     """, (member_id, username, password, role))
 
     conn.commit()
@@ -434,10 +435,10 @@ def search_books(input_value):
     """
 
     if input_value.isdigit():
-        query = base_query + " WHERE b.id = ? GROUP BY b.id"
+        query = base_query + " WHERE b.id = %s GROUP BY b.id"
         cursor.execute(query, (input_value,))
     else:
-        query = base_query + " WHERE b.title LIKE ? GROUP BY b.id"
+        query = base_query + " WHERE b.title LIKE %s GROUP BY b.id"
         cursor.execute(query, (f"%{input_value}%",))
 
     results = cursor.fetchall()
