@@ -301,7 +301,9 @@ def get_overdue_books():
     today = date.today()
 
     cursor.execute("""
-    SELECT * FROM issues WHERE return_date IS NULL AND due_date < %s
+    SELECT * FROM issues 
+    WHERE return_date IS NULL 
+    AND due_date::date < %s
     """, (today,))
     overdue= cursor.fetchall()
     result = []
