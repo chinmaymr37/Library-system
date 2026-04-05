@@ -242,3 +242,27 @@ form {
         transform: translateY(0);
     }
 }
+
+#scanner-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    z-index: 1000;
+}
+
+#scanner {
+    width: 400px;
+    height: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#scanner-container button {
+    margin-top: 10px;
+    width: 100%;
+}

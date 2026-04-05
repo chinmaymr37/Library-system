@@ -38,8 +38,9 @@
     <h2>Search Book</h2>
 
     <form method="post">
-        <input type="text" name="input_value" placeholder="Search" required>
+        <input type="text" name="input_value" id="input_value" placeholder="Search" required>
         <button type="submit">Search</button>
+        <button type="button" onclick="startScanner('input_value')">Scan Barcode</button>
     </form>
 
     {% if copy %}

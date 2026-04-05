@@ -435,6 +435,21 @@ def search_books(input_value):
     FROM books b
     LEFT JOIN copies c ON b.id = c.book_id
     """
+    cursor.execute("""
+    SELECT b.id, b.title, b.author, b.category,
+        COUNT(c.copy_id) AS total_copies,
+        COALESCE(SUM(c.available), 0) AS available_copies
+        FROM copies c
+        JOIN books b ON c.book_id = b.id
+        WHERE c.barcode = %s
+        GROUP BY b.id
+        """, (input_value,))
+
+    barcode_result = cursor.fetchall()
+
+    if barcode_result:
+        conn.close()
+        return barcode_result, True
 
     if input_value.isdigit():
         query = base_query + " WHERE b.id = %s GROUP BY b.id"
