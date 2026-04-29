@@ -296,6 +296,19 @@ def open_library():
                          query=query,
                          book_id=book_id)
 
+@app.route("/read_book")
+@login_required
+def read_book():
+    url = request.args.get("url", "")
+    if not url:
+        return "No book URL provided", 400
+    try:
+        response = requests.get(url, timeout=10)
+        content = response.text
+        return content, 200, {"Content-Type": "text/html; charset=utf-8"}
+    except Exception:
+        return "Could not load book. Please try again.", 500
+
 if __name__ == "__main__":
     app.run()
 

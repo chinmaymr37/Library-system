@@ -326,10 +326,11 @@
 
     <script>
         function openReader(url, title) {
-            document.getElementById("readerFrame").src = url;
-            document.getElementById("modalTitle").textContent = title;
-            document.getElementById("readerModal").classList.add("active");
-        }
+        const proxyUrl = "/read_book?url=" + encodeURIComponent(url);
+        document.getElementById("readerFrame").src = proxyUrl;
+        document.getElementById("modalTitle").textContent = title;
+        document.getElementById("readerModal").classList.add("active");
+        }   
         function closeReader() {
             document.getElementById("readerFrame").src = "";
             document.getElementById("readerModal").classList.remove("active");
