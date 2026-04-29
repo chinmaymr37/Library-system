@@ -11,13 +11,11 @@
             gap: 10px;
             margin-bottom: 30px;
         }
-        .search-bar input {
-            width: 400px;
-            padding: 12px;
-        }
+        .search-bar input { width: 400px; padding: 12px; }
+
         .books-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 24px;
             margin-top: 20px;
         }
@@ -31,20 +29,21 @@
             flex-direction: column;
             align-items: center;
             padding-bottom: 14px;
+            cursor: pointer;
         }
         .book-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(0,255,200,0.3);
+            box-shadow: 0 0 20px rgba(0,255,200,0.4);
         }
         .book-card img {
             width: 100%;
-            height: 220px;
+            height: 200px;
             object-fit: cover;
             border-bottom: 1px solid rgba(0,255,200,0.1);
         }
-        .book-card .no-cover {
+        .no-cover {
             width: 100%;
-            height: 220px;
+            height: 200px;
             background: linear-gradient(135deg, #1a2e2a, #0d1f1c);
             display: flex;
             align-items: center;
@@ -54,14 +53,14 @@
             border-bottom: 1px solid rgba(0,255,200,0.1);
         }
         .book-info {
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             width: 100%;
         }
         .book-info h4 {
             color: #e0e0e0;
-            font-size: 14px;
-            margin: 0 0 6px 0;
+            font-size: 13px;
+            margin: 0 0 5px 0;
             line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -70,37 +69,79 @@
         }
         .book-info p {
             color: #888;
-            font-size: 12px;
-            margin: 0 0 4px 0;
-        }
-        .book-info .year {
-            color: #00ffcc88;
             font-size: 11px;
+            margin: 0 0 8px 0;
         }
         .read-btn {
-            margin-top: 10px;
-            padding: 7px 16px;
+            padding: 6px 14px;
             font-size: 12px;
             background: linear-gradient(45deg, #00ffcc, #00ccaa);
             color: black;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            text-decoration: none;
             font-weight: bold;
             transition: 0.3s;
             display: inline-block;
+            text-decoration: none;
         }
         .read-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 0 12px rgba(0,255,200,0.5);
             color: black;
         }
-        .no-results {
-            text-align: center;
-            color: #888;
-            margin-top: 40px;
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #1e1e1e;
+            width: 90%;
+            height: 90vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,255,200,0.3);
+        }
+        .modal-header {
+            padding: 14px 20px;
+            background: #121212;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,255,200,0.2);
+        }
+        .modal-header h3 {
+            color: #00ffcc;
+            margin: 0;
             font-size: 16px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            transition: 0.2s;
+        }
+        .modal-close:hover { color: #00ffcc; transform: scale(1.1); }
+        .modal-box iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+            background: white;
         }
         .result-count {
             text-align: center;
@@ -110,14 +151,24 @@
         }
         .hero-text {
             text-align: center;
-            margin: 30px 0;
+            margin: 20px 0 10px 0;
             color: #888;
         }
         .hero-text i {
             font-size: 48px;
             color: #00ffcc44;
             display: block;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+        }
+        .no-results {
+            text-align: center;
+            color: #888;
+            margin-top: 40px;
+        }
+        .section-title {
+            color: #00ffcc;
+            margin: 20px 0 10px 0;
+            text-align: center;
         }
     </style>
 </head>
@@ -155,39 +206,53 @@
     {% endwith %}
 
     <div class="container">
-        <h2><i class="fas fa-globe"></i> Read Books Online</h2>
+        <h2><i class="fas fa-book-reader"></i> Read Books Online</h2>
         <p style="text-align:center; color:#888; margin-bottom:24px;">
-            Powered by <a href="https://openlibrary.org" target="_blank" style="color:#00ffcc;">Open Library</a> — access millions of free books
+            Powered by <a href="https://www.gutenberg.org" target="_blank" 
+            style="color:#00ffcc;">Project Gutenberg</a> 
+            — 70,000+ free classic books, no login required
         </p>
 
         <form method="GET" action="/open_library" class="search-bar">
-            <input type="text" name="q" placeholder="Search by title, author, or topic..." value="{{ query }}" required>
-            <button type="submit"><i class="fas fa-search"></i> Search</button>
+            <input type="text" name="q" 
+                   placeholder="Search classics — Shakespeare, Austen, Doyle..." 
+                   value="{{ query }}">
+            <button type="submit">
+                <i class="fas fa-search"></i> Search
+            </button>
         </form>
 
         {% if books %}
-            {% if books %}
-            <p class="result-count">Found {{ books|length }} results for "<strong>{{ query }}</strong>"</p>
+            <p class="result-count">
+                Found {{ books|length }} results for 
+                "<strong>{{ query }}</strong>"
+            </p>
             <div class="books-grid">
                 {% for book in books %}
                 <div class="book-card">
-                    {% if book.cover_id %}
-                        <img src="https://covers.openlibrary.org/b/id/{{ book.cover_id }}-M.jpg"
-                             alt="{{ book.title }}"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="no-cover" style="display:none;"><i class="fas fa-book"></i></div>
+                    {% if book.cover %}
+                        <img src="{{ book.cover }}" alt="{{ book.title }}"
+                             onerror="this.style.display='none'; 
+                             this.nextElementSibling.style.display='flex';">
+                        <div class="no-cover" style="display:none;">
+                            <i class="fas fa-book"></i>
+                        </div>
                     {% else %}
                         <div class="no-cover"><i class="fas fa-book"></i></div>
                     {% endif %}
                     <div class="book-info">
                         <h4>{{ book.title }}</h4>
                         <p>{{ book.author }}</p>
-                        <p class="year">{{ book.year }}</p>
-                        <a href="https://openlibrary.org{{ book.key }}"
-                           target="_blank"
-                           class="read-btn">
-                            <i class="fas fa-book-open"></i> Read Online
-                        </a>
+                        {% if book.read_url %}
+                            <button class="read-btn" 
+                                    onclick="openReader('{{ book.read_url }}', '{{ book.title }}')">
+                                <i class="fas fa-book-open"></i> Read Now
+                            </button>
+                        {% else %}
+                            <span style="color:#555; font-size:11px;">
+                                Not available
+                            </span>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -195,41 +260,49 @@
 
         {% elif query %}
             <div class="no-results">
-                <i class="fas fa-search" style="font-size:40px; color:#333; display:block; margin-bottom:12px;"></i>
-                No books found for "<strong>{{ query }}</strong>". Try a different search.
+                <i class="fas fa-search" 
+                   style="font-size:40px; color:#333; 
+                   display:block; margin-bottom:12px;"></i>
+                No books found for "<strong>{{ query }}</strong>".
             </div>
 
         {% else %}
             <div class="hero-text">
                 <i class="fas fa-book-open"></i>
-                <h3 style="color:#00ffcc;">Explore Millions of Free Books</h3>
-                <p>Search for any book above to find and read it online for free.</p>
+                <h3 style="color:#00ffcc;">70,000+ Free Classic Books</h3>
+                <p>Search above or browse what's popular below.</p>
             </div>
 
             {% if trending %}
-            <h3 style="color:#00ffcc; margin-top:30px;">
-                <i class="fas fa-fire"></i> Trending Today
+            <h3 class="section-title">
+                <i class="fas fa-star"></i> Popular Books
             </h3>
             <div class="books-grid">
                 {% for book in trending %}
                 <div class="book-card">
-                    {% if book.cover_id %}
-                        <img src="https://covers.openlibrary.org/b/id/{{ book.cover_id }}-M.jpg"
-                             alt="{{ book.title }}"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="no-cover" style="display:none;"><i class="fas fa-book"></i></div>
+                    {% if book.cover %}
+                        <img src="{{ book.cover }}" alt="{{ book.title }}"
+                             onerror="this.style.display='none'; 
+                             this.nextElementSibling.style.display='flex';">
+                        <div class="no-cover" style="display:none;">
+                            <i class="fas fa-book"></i>
+                        </div>
                     {% else %}
                         <div class="no-cover"><i class="fas fa-book"></i></div>
                     {% endif %}
                     <div class="book-info">
                         <h4>{{ book.title }}</h4>
                         <p>{{ book.author }}</p>
-                        <p class="year">{{ book.year }}</p>
-                        <a href="https://openlibrary.org{{ book.key }}"
-                           target="_blank"
-                           class="read-btn">
-                            <i class="fas fa-book-open"></i> Read Online
-                        </a>
+                        {% if book.read_url %}
+                            <button class="read-btn" 
+                                    onclick="openReader('{{ book.read_url }}', '{{ book.title }}')">
+                                <i class="fas fa-book-open"></i> Read Now
+                            </button>
+                        {% else %}
+                            <span style="color:#555; font-size:11px;">
+                                Not available
+                            </span>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -238,5 +311,33 @@
         {% endif %}
     </div>
 
+    <!-- Reader Modal -->
+    <div class="modal-overlay" id="readerModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle">Reading...</h3>
+                <button class="modal-close" onclick="closeReader()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <iframe id="readerFrame" src="" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <script>
+        function openReader(url, title) {
+            document.getElementById("readerFrame").src = url;
+            document.getElementById("modalTitle").textContent = title;
+            document.getElementById("readerModal").classList.add("active");
+        }
+        function closeReader() {
+            document.getElementById("readerFrame").src = "";
+            document.getElementById("readerModal").classList.remove("active");
+        }
+        // Close on backdrop click
+        document.getElementById("readerModal").addEventListener("click", function(e) {
+            if (e.target === this) closeReader();
+        });
+    </script>
 </body>
 </html>

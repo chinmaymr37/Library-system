@@ -230,45 +230,71 @@ def register():
 @login_required
 def open_library():
     query = request.args.get("q", "")
+    book_id = request.args.get("book_id", "")
     books = []
     trending = []
 
     if query:
         try:
             response = requests.get(
-                f"https://openlibrary.org/search.json?q={query}&limit=12",
+                f"https://gutendex.com/books?search={query}&page_size=12",
                 timeout=5
             )
             data = response.json()
-            for doc in data.get("docs", []):
+            for doc in data.get("results", []):
+                formats = doc.get("formats", {})
+                read_url = (
+                    formats.get("text/html") or
+                    formats.get("application/xhtml+xml") or
+                    formats.get("text/plain; charset=utf-8") or
+                    formats.get("text/plain") or ""
+                )
+                cover = formats.get("image/jpeg", "")
                 books.append({
+                    "id": doc.get("id"),
                     "title": doc.get("title", "Unknown"),
-                    "author": ", ".join(doc.get("author_name", ["Unknown"])),
-                    "year": doc.get("first_publish_year", "N/A"),
-                    "cover_id": doc.get("cover_i"),
-                    "key": doc.get("key", "")
+                    "author": ", ".join(
+                        a.get("name", "") for a in doc.get("authors", [])
+                    ),
+                    "cover": cover,
+                    "read_url": read_url
                 })
         except Exception:
-            flash("Could not connect to Open Library. Please try again.")
+            flash("Could not connect to Gutenberg. Please try again.")
+
     else:
         try:
             response = requests.get(
-                "https://openlibrary.org/trending/daily.json?limit=10",
+                "https://gutendex.com/books?page_size=10",
                 timeout=5
             )
             data = response.json()
-            for doc in data.get("works", []):
+            for doc in data.get("results", []):
+                formats = doc.get("formats", {})
+                read_url = (
+                    formats.get("text/html") or
+                    formats.get("application/xhtml+xml") or
+                    formats.get("text/plain; charset=utf-8") or
+                    formats.get("text/plain") or ""
+                )
+                cover = formats.get("image/jpeg", "")
                 trending.append({
+                    "id": doc.get("id"),
                     "title": doc.get("title", "Unknown"),
-                    "author": ", ".join(doc.get("author_name", ["Unknown"])),
-                    "year": doc.get("first_publish_year", "N/A"),
-                    "cover_id": doc.get("cover_i"),
-                    "key": doc.get("key", "")
+                    "author": ", ".join(
+                        a.get("name", "") for a in doc.get("authors", [])
+                    ),
+                    "cover": cover,
+                    "read_url": read_url
                 })
         except Exception:
-            flash("Could not load trending books.")
+            flash("Could not load books.")
 
-    return render_template("open_library.html", books=books, trending=trending, query=query)
+    return render_template("open_library.html", 
+                         books=books, 
+                         trending=trending, 
+                         query=query,
+                         book_id=book_id)
 
 if __name__ == "__main__":
     app.run()
