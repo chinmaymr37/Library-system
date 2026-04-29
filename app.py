@@ -231,20 +231,44 @@ def register():
 def open_library():
     query = request.args.get("q", "")
     books = []
+    trending = []
+
     if query:
-        response = requests.get(
-            f"https://openlibrary.org/search.json?q={query}&limit=10"
-        )
-        data = response.json()
-        for doc in data.get("docs", []):
-            books.append({
-                "title": doc.get("title", "Unknown"),
-                "author": ", ".join(doc.get("author_name", ["Unknown"])),
-                "year": doc.get("first_publish_year", "N/A"),
-                "cover_id": doc.get("cover_i"),
-                "key": doc.get("key", "")
-            })
-    return render_template("open_library.html", books=books, query=query)
+        try:
+            response = requests.get(
+                f"https://openlibrary.org/search.json?q={query}&limit=12",
+                timeout=5
+            )
+            data = response.json()
+            for doc in data.get("docs", []):
+                books.append({
+                    "title": doc.get("title", "Unknown"),
+                    "author": ", ".join(doc.get("author_name", ["Unknown"])),
+                    "year": doc.get("first_publish_year", "N/A"),
+                    "cover_id": doc.get("cover_i"),
+                    "key": doc.get("key", "")
+                })
+        except Exception:
+            flash("Could not connect to Open Library. Please try again.")
+    else:
+        try:
+            response = requests.get(
+                "https://openlibrary.org/trending/daily.json?limit=10",
+                timeout=5
+            )
+            data = response.json()
+            for doc in data.get("works", []):
+                trending.append({
+                    "title": doc.get("title", "Unknown"),
+                    "author": ", ".join(doc.get("author_name", ["Unknown"])),
+                    "year": doc.get("first_publish_year", "N/A"),
+                    "cover_id": doc.get("cover_i"),
+                    "key": doc.get("key", "")
+                })
+        except Exception:
+            flash("Could not load trending books.")
+
+    return render_template("open_library.html", books=books, trending=trending, query=query)
 
 if __name__ == "__main__":
     app.run()

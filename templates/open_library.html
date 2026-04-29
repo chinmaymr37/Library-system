@@ -166,6 +166,7 @@
         </form>
 
         {% if books %}
+            {% if books %}
             <p class="result-count">Found {{ books|length }} results for "<strong>{{ query }}</strong>"</p>
             <div class="books-grid">
                 {% for book in books %}
@@ -204,6 +205,36 @@
                 <h3 style="color:#00ffcc;">Explore Millions of Free Books</h3>
                 <p>Search for any book above to find and read it online for free.</p>
             </div>
+
+            {% if trending %}
+            <h3 style="color:#00ffcc; margin-top:30px;">
+                <i class="fas fa-fire"></i> Trending Today
+            </h3>
+            <div class="books-grid">
+                {% for book in trending %}
+                <div class="book-card">
+                    {% if book.cover_id %}
+                        <img src="https://covers.openlibrary.org/b/id/{{ book.cover_id }}-M.jpg"
+                             alt="{{ book.title }}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="no-cover" style="display:none;"><i class="fas fa-book"></i></div>
+                    {% else %}
+                        <div class="no-cover"><i class="fas fa-book"></i></div>
+                    {% endif %}
+                    <div class="book-info">
+                        <h4>{{ book.title }}</h4>
+                        <p>{{ book.author }}</p>
+                        <p class="year">{{ book.year }}</p>
+                        <a href="https://openlibrary.org{{ book.key }}"
+                           target="_blank"
+                           class="read-btn">
+                            <i class="fas fa-book-open"></i> Read Online
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         {% endif %}
     </div>
 
