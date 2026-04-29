@@ -152,6 +152,7 @@ def get_all_books():
     FROM books
     LEFT JOIN copies ON books.id = copies.book_id
     GROUP BY books.id
+    ORDER BY books.id ASC
     """)
     books = cursor.fetchall()
 
