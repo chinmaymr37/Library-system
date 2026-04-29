@@ -225,6 +225,26 @@ def register():
         return redirect(url_for("register"))
     return render_template("register.html")
 
+@app.route("/open_library")
+@login_required
+def open_library():
+    query = request.args.get("q", "")
+    books = []
+    if query:
+        response = requests.get(
+            f"https://openlibrary.org/search.json?q={query}&limit=10"
+        )
+        data = response.json()
+        for doc in data.get("docs", []):
+            books.append({
+                "title": doc.get("title", "Unknown"),
+                "author": ", ".join(doc.get("author_name", ["Unknown"])),
+                "year": doc.get("first_publish_year", "N/A"),
+                "cover_id": doc.get("cover_i"),
+                "key": doc.get("key", "")
+            })
+    return render_template("open_library.html", books=books, query=query)
+
 if __name__ == "__main__":
     app.run()
 
