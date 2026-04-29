@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash , session, url_for
+import requests
 from models.database import create_table, add_book ,add_copy , get_all_books , delete_book ,issue_book , return_book, get_copy_by_barcode, get_overdue_books, get_user_by_username , add_member , get_all_members, get_issued_books , get_member_issues , add_user , search_books
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
