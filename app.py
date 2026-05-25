@@ -210,9 +210,9 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    #if session.get("role") != "admin":
-    #    flash("Only admin can add users")
-    #    return redirect(url_for("home"))
+    if session.get("role") != "admin":
+        flash("Only admin can add users")
+        return redirect(url_for("home"))
     if request.method == "POST":
         member_id = request.form.get("member_id")
         member_id = int(member_id) if member_id else None
