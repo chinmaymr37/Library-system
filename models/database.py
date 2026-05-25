@@ -5,7 +5,10 @@ import os
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_connection():
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(
+        DATABASE_URL,
+        sslmode="require"
+    )
 
 def create_table():
     create_book_table()
